@@ -59,7 +59,18 @@ public class Application {
         Repas repas1 = new Repas( plat1, List.of(ingr1, ingr2), List.of(supp1, supp2));
         Repas repas2 = new Repas( plat2, List.of(ingr3, ingr4), List.of(supp3, supp4));
         repasController.creerRepas(repas1);
+        repasController.ajouterIngredient(1, 1);
+        repasController.ajouterIngredient(1, 2);
+        repasController.ajouterSupplement(1, 1);
+        repasController.ajouterSupplement(1, 2);
+
         repasController.creerRepas(repas2);
+        repasController.ajouterIngredient(2, 3);
+        repasController.ajouterIngredient(2, 4);
+        repasController.ajouterSupplement(2, 3);
+        repasController.ajouterSupplement(2, 4);
+
+        System.out.println("Repas 1: " + repas1);
 
         // Création de la commande
         Commande commande = new Commande( client, repas1.getTotalPrice() + repas2.getTotalPrice());

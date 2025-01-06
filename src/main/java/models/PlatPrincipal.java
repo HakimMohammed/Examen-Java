@@ -23,4 +23,9 @@ public class PlatPrincipal {
 
     public void setNom(String nom) { this.nom = nom; }
     public void setPrixBase(double prixBase) { this.prixBase = prixBase; }
+
+    @Override
+    public String toString() {
+        return nom;
+    }
 }

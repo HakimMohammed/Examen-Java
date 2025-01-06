@@ -69,6 +69,72 @@ public class RepasDAO {
         return null;
     }
 
+    public List<Repas> readAll() {
+        String SQL = "SELECT r.id AS repas_id, r.total_price, p.id AS plat_id, p.name AS plat_name, p.base_price AS plat_price " +
+                "FROM Repas r " +
+                "JOIN PlatPrincipal p ON r.main_dish_id = p.id";
+
+        List<Repas> repasList = new ArrayList<>();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                PlatPrincipal mainDish = new PlatPrincipal(
+                        resultSet.getInt("plat_id"),
+                        resultSet.getString("plat_name"),
+                        resultSet.getDouble("plat_price")
+                );
+
+                // Get ingredients for the current meal using JOIN
+                String ingredientSQL = "SELECT i.id, i.name, i.price, ri.quantity " +
+                        "FROM RepasIngredient ri " +
+                        "JOIN Ingredient i ON ri.ingredient_id = i.id " +
+                        "WHERE ri.meal_id = ?";
+                PreparedStatement ingredientStmt = connection.prepareStatement(ingredientSQL);
+                ingredientStmt.setInt(1, resultSet.getInt("repas_id"));
+                ResultSet ingredientResult = ingredientStmt.executeQuery();
+                List<Ingredient> ingredients = new ArrayList<>();
+                while (ingredientResult.next()) {
+                    Ingredient ingredient = new Ingredient(
+                            ingredientResult.getInt("id"),
+                            ingredientResult.getString("name"),
+                            ingredientResult.getDouble("price")
+                    );
+                    ingredients.add(ingredient); // Optionally handle quantity here
+                }
+
+                // Get supplements for the current meal using JOIN
+                String supplementSQL = "SELECT s.id, s.name, s.price " +
+                        "FROM RepasSupplement rs " +
+                        "JOIN Supplement s ON rs.supplement_id = s.id " +
+                        "WHERE rs.meal_id = ?";
+                PreparedStatement supplementStmt = connection.prepareStatement(supplementSQL);
+                supplementStmt.setInt(1, resultSet.getInt("repas_id"));
+                ResultSet supplementResult = supplementStmt.executeQuery();
+                List<Supplement> supplements = new ArrayList<>();
+                while (supplementResult.next()) {
+                    Supplement supplement = new Supplement(
+                            supplementResult.getInt("id"),
+                            supplementResult.getString("name"),
+                            supplementResult.getDouble("price")
+                    );
+                    supplements.add(supplement);
+                }
+
+                repasList.add(new Repas(
+                        resultSet.getInt("repas_id"),
+                        mainDish,
+                        ingredients,
+                        supplements
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return repasList;
+    }
+
+
     private List<Ingredient> getIngredientsForRepas(int repasId) {
         String SQL = "SELECT i.id, i.name, i.price " +
                 "FROM RepasIngredient ri " +
@@ -116,6 +182,31 @@ public class RepasDAO {
         return supplements;
     }
 
+    // add an ingredient to a meal
+    public void addIngredientToRepas(int repasId, int ingredientId) {
+        String SQL = "INSERT INTO RepasIngredient (meal_id, ingredient_id, quantity) VALUES (?, ?, ?)";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL);
+            preparedStatement.setInt(1, repasId);
+            preparedStatement.setInt(2, ingredientId);
+            preparedStatement.setInt(3, 1); // default quantity
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
+    // add a supplement to a meal
+    public void addSupplementToRepas(int repasId, int supplementId) {
+        String SQL = "INSERT INTO RepasSupplement (meal_id, supplement_id) VALUES (?, ?)";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL);
+            preparedStatement.setInt(1, repasId);
+            preparedStatement.setInt(2, supplementId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

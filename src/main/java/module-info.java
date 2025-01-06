@@ -4,8 +4,13 @@ module exam.javaexam {
     requires java.sql;
     requires java.desktop;
 
-    opens exam.javaexam to javafx.fxml;
+    exports database;
+    exports controllers;
+    exports services;
+    exports models;
+    exports views;
+    exports dao;
 
-    //exports views.dialogs.patient;
+
 
 }

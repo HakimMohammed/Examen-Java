@@ -1,6 +1,7 @@
 package models;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Repas {
     private int id;
@@ -39,5 +40,16 @@ public class Repas {
             total += supplement.getPrix();
         }
         return total;
+    }
+
+    @Override
+    public String toString() {
+        return "Repas {" +
+                "id=" + id +
+                ", mainDish=" + mainDish.getNom() +
+                ", ingredients=" + ingredients.stream().map(Ingredient::getNom).collect(Collectors.joining(", ")) +
+                ", supplements=" + supplements.stream().map(Supplement::getNom).collect(Collectors.joining(", ")) +
+                ", totalPrice=" + totalPrice +
+                '}';
     }
 }
